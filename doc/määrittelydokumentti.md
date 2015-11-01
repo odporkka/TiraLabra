@@ -10,7 +10,5 @@ Ohjelmassa on graafinen käyttöliittymä tiedoston valitsemiseen ja sen pakkaam
 Algoritmien pitäisi pystyä pakkaamaan tiedosto 40-60% alkuperäisestä koosta ja niiden pitää pystyä myös purkamaan se alkuperäiseen muotoon. Aikatavoitteet ovat algoritmikohtaisia ja ne päivitetään myöhemmin
 
 ##Lähteet
--Wikipedia
--Täydennetään myöhemmin
--(Google)  
+Wikipedia/Google (täydennetään myöhemmin)  
 
