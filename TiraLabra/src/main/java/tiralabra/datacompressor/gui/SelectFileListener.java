@@ -44,7 +44,6 @@ public class SelectFileListener implements ActionListener{
             //this.fmgr.setFile(fc.getSelectedFile().getAbsolutePath());
             this.fmgr.setFile(fc.getSelectedFile());
         } else {
-            this.fmgr.fileLabel = "File not selected!";
         }
         this.fileLabel.setText(this.fmgr.fileLabel);
         parentComponent.revalidate();

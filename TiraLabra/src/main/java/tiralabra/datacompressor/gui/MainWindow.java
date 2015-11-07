@@ -44,32 +44,37 @@ public class MainWindow implements Runnable {
      * @param contentPane 
      */
     private void createComponents(Container contentPane) {
+        //Making layout and main Panel
         GridLayout gl = new GridLayout(4, 2);
         JPanel mainPanel = new JPanel(gl);
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         gl.setHgap(10);
         gl.setVgap(10);
         
+        //Adding all content
         JLabel currentFile = new JLabel("Current file: ");
         JLabel currentFileLabel = new JLabel(fmgr.getPath());
         SelectFileListener selectListener = new SelectFileListener(
                 contentPane, this.fmgr, currentFileLabel);
-        JButton changeFile = new JButton("Change");
+        JButton changeFile = new JButton("Choose file!");
         changeFile.addActionListener(selectListener);
         JLabel currentCoding = new JLabel("Coding:");
         String[] options = {"Huffman"};
         JComboBox<String> selectCoding = new JComboBox<>(options);
-        JButton compressButton = new JButton("Convert");
+        JButton deCompressButton = new JButton("Extract!");
+        JButton compressButton = new JButton("Compress!");        
         
+        //adding content to main panel
         mainPanel.add(currentFile);
         mainPanel.add(currentFileLabel);
         mainPanel.add(new JLabel(""));
         mainPanel.add(changeFile);
         mainPanel.add(currentCoding);
         mainPanel.add(selectCoding);
-        mainPanel.add(new JLabel(""));
+        mainPanel.add(deCompressButton);
         mainPanel.add(compressButton);
         
-        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        //adding main panel to frame
         contentPane.add(mainPanel);   
     }
 
