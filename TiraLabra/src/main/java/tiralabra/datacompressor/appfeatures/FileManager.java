@@ -56,6 +56,16 @@ public class FileManager {
     }
 
     /**
+     * Returns current file as string.
+     * @return String of current file
+     */
+    public String getFileAsString() {
+        return fileAsString;
+    }
+    
+    
+
+    /**
      * Returns path to current capsuled file.
      *
      * @return String object for file path or fileLabel message if none is set.
