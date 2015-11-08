@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import tiralabra.datacompressor.appfeatures.huffman.HuffmanCompressor;
 
 /**
  * Class for file capsuling and conversion managing.
@@ -20,6 +21,7 @@ public class FileManager {
     private String fileAsString;
     private byte[] fileAsByteArray;
     public boolean error;
+    private final HuffmanCompressor huffmanCompressor;
 
     /**
      * Class constructor. Sets fileLabel to value shown when program is first
@@ -28,6 +30,7 @@ public class FileManager {
     public FileManager() {
         this.fileLabel = "File not selected!";
         this.error = false;
+        this.huffmanCompressor = new HuffmanCompressor();
     }
 
     /**
@@ -63,8 +66,6 @@ public class FileManager {
         return fileAsString;
     }
     
-    
-
     /**
      * Returns path to current capsuled file.
      *
@@ -77,9 +78,19 @@ public class FileManager {
         return this.fileLabel;
     }
     
-    public void huffmanCompress(){
-        
-        
+    /**
+     * Method for Huffman compressing and extracting.
+     * @return Boolean t, True if succeeded and false if not
+     */
+    public boolean huffmanCompress(){
+        if (this.fileAsByteArray == null){
+            this.fileLabel = "Set file first!";
+            this.error = true;
+            return false;
+        }
+        huffmanCompressor.setByteArray(this.fileAsByteArray);
+        File result = huffmanCompressor.compress();
+        return true;
     }
 
     /**

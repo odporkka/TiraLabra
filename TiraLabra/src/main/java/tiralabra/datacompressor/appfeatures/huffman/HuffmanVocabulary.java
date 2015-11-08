@@ -5,10 +5,19 @@
  */
 package tiralabra.datacompressor.appfeatures.huffman;
 
+import java.util.HashMap;
+
 /**
  *
  * @author ode
  */
-public class HuffmanAlphabet {
+public class HuffmanVocabulary {
     
+      private final HashMap<Integer, Byte> vocabulary;
+
+    public HuffmanVocabulary() {
+        this.vocabulary = new HashMap<>(256);
+    }
+      
+      
 }

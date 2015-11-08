@@ -27,7 +27,7 @@ public class SelectFileListener implements ActionListener{
     public SelectFileListener(Container parentComponent, FileManager fmgr, JLabel l) {
         this.parentComponent = parentComponent;
         this.fc = new JFileChooser();
-        this.fmgr = new FileManager();
+        this.fmgr = fmgr;
         this.fileLabel = l;
     }
 

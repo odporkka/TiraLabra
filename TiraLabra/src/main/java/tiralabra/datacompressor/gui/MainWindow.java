@@ -63,7 +63,8 @@ public class MainWindow implements Runnable {
         JLabel currentCoding = new JLabel("Coding:");
         String[] options = {"Huffman"};
         JComboBox<String> selectCoding = new JComboBox<>(options);
-        CompressListener compListener = new CompressListener(this.fmgr, selectCoding);
+        CompressListener compListener = new CompressListener(this.fmgr, 
+                selectCoding, currentFileLabel);
         JButton deCompressButton = new JButton("Extract!");
         JButton compressButton = new JButton("Compress!");
         compressButton.addActionListener(compListener);
