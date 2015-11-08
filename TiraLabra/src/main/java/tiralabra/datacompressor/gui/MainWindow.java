@@ -31,7 +31,7 @@ public class MainWindow implements Runnable {
     @Override
     public void run() {
         frame = new JFrame("Data Compressor v1.0 - by Ode");
-        frame.setPreferredSize(new Dimension(500, 250));
+        frame.setPreferredSize(new Dimension(600, 250));
         frame.setLocation(500, 250);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         createComponents(frame.getContentPane());
@@ -52,17 +52,21 @@ public class MainWindow implements Runnable {
         gl.setVgap(10);
         
         //Adding all content
+        //File choosing
         JLabel currentFile = new JLabel("Current file: ");
         JLabel currentFileLabel = new JLabel(fmgr.getPath());
         SelectFileListener selectListener = new SelectFileListener(
                 contentPane, this.fmgr, currentFileLabel);
         JButton changeFile = new JButton("Choose file!");
         changeFile.addActionListener(selectListener);
+        //Coding choosing
         JLabel currentCoding = new JLabel("Coding:");
         String[] options = {"Huffman"};
         JComboBox<String> selectCoding = new JComboBox<>(options);
+        CompressListener compListener = new CompressListener(this.fmgr, selectCoding);
         JButton deCompressButton = new JButton("Extract!");
-        JButton compressButton = new JButton("Compress!");        
+        JButton compressButton = new JButton("Compress!");
+        compressButton.addActionListener(compListener);
         
         //adding content to main panel
         mainPanel.add(currentFile);

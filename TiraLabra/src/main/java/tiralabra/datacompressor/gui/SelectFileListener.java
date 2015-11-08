@@ -1,5 +1,6 @@
 package tiralabra.datacompressor.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -13,7 +14,7 @@ import tiralabra.datacompressor.appfeatures.FileManager;
  */
 public class SelectFileListener implements ActionListener{
     Container parentComponent;
-    final JFileChooser fc;
+    private final JFileChooser fc;
     FileManager fmgr;
     JLabel fileLabel;
 
@@ -42,8 +43,16 @@ public class SelectFileListener implements ActionListener{
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             //this.fmgr.setFile(fc.getSelectedFile().getAbsolutePath());
+            this.fileLabel.setText("Reading file...");
+            parentComponent.revalidate();
+            parentComponent.repaint();
             this.fmgr.setFile(fc.getSelectedFile());
+            this.fileLabel.setForeground(Color.BLACK);
+            if (this.fmgr.error == true) this.fileLabel.setForeground(Color.red);
         } else {
+            if (this.fmgr.getFile() == null){
+                this.fileLabel.setForeground(Color.red);
+            }
         }
         this.fileLabel.setText(this.fmgr.fileLabel);
         parentComponent.revalidate();
