@@ -5,7 +5,6 @@ import java.io.File;
 public class HuffmanCompressor {
     
     private byte[] byteArray;
-    private HuffmanTree tree;
     private HuffmanVocabulary voc;
 
     public HuffmanCompressor() {
@@ -17,8 +16,7 @@ public class HuffmanCompressor {
     
     public File compress(){
         File result = null;
-        this.tree = new HuffmanTree(byteArray);
-        this.tree.makeTree();
+        this.voc = new HuffmanVocabulary(byteArray);
         return result;   
     }
 }
