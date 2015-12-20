@@ -15,21 +15,23 @@ import java.util.Set;
  *
  * @author ode
  */
-public class HuffmanVocabulary {
+public class HuffmanDictionary {
 
-    private final HashMap<String, Byte> vocabulary;
+    private final HashMap<String, Byte> dictionary;
+    private final HashMap<Byte, String> dictionaryByByte;
     private final ArrayList<String> bitCombinations;
     private final byte[] byteArray;
     private final HashMap<Byte, Long> bytesByCount;
 
-    public HuffmanVocabulary(byte[] byteArray) {
-        this.vocabulary = new HashMap<>(256);
+    public HuffmanDictionary(byte[] byteArray) {
+        this.dictionary = new HashMap<>(256);
+        this.dictionaryByByte = new HashMap<>(256);
         this.bitCombinations = new ArrayList<>();
         this.byteArray = byteArray;
         this.bytesByCount = new HashMap<>();
         makeBitCombs();
         countBytes();
-        makeVocabulary();
+        makeDictionary();
     }
 
     /**
@@ -89,26 +91,27 @@ public class HuffmanVocabulary {
     }
 
     /**
-     * Method for making vocabulary for current read file (byteArray).
+     * Method for making dictionary for current read file (byteArray).
      */
-    private void makeVocabulary() {
+    private void makeDictionary() {
         for (String bitCombination : bitCombinations) {
             if (bytesByCount.isEmpty()) {
                 break;
             }
             Byte b = findMostCommonByte();
-            vocabulary.put(bitCombination, b);
+            dictionary.put(bitCombination, b);
+            dictionaryByByte.put(b, bitCombination);
             bytesByCount.remove(b);
         }
     }
 
     /**
-     * Test method for printing vocabulary.
+     * Test method for printing dictionary.
      */
-    private void printVocabulary() {
-        Set<String> keySet = vocabulary.keySet();
+    private void printDictionary() {
+        Set<String> keySet = dictionary.keySet();
         for (String key : keySet) {
-            System.out.println(vocabulary.get(key) + ": " + key);
+            System.out.println(dictionary.get(key) + ": " + key);
         }
     }
 
@@ -128,6 +131,10 @@ public class HuffmanVocabulary {
         }
         b = max.getKey();
         return b;
+    }
+
+    public HashMap<Byte, String> getDictionaryByByte() {
+        return dictionaryByByte;
     }
     
     public Byte check(BitSet bs){

@@ -22,6 +22,7 @@ public class FileManager {
     private byte[] fileAsByteArray;
     public boolean error;
     private final HuffmanCompressor huffmanCompressor;
+    private final ByteHandler bh;
 
     /**
      * Class constructor. Sets fileLabel to value shown when program is first
@@ -30,7 +31,9 @@ public class FileManager {
     public FileManager() {
         this.fileLabel = "File not selected!";
         this.error = false;
-        this.huffmanCompressor = new HuffmanCompressor();
+        this.bh = new ByteHandler();
+        this.huffmanCompressor = new HuffmanCompressor(bh);
+        
     }
 
     /**
