@@ -94,6 +94,7 @@ public class HuffmanDictionary {
      * Method for making dictionary for current read file (byteArray).
      */
     private void makeDictionary() {
+        System.out.println("Making dictionary...");
         for (String bitCombination : bitCombinations) {
             if (bytesByCount.isEmpty()) {
                 break;
@@ -103,6 +104,7 @@ public class HuffmanDictionary {
             dictionaryByByte.put(b, bitCombination);
             bytesByCount.remove(b);
         }
+        System.out.println("Done!");
     }
 
     /**

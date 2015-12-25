@@ -1,9 +1,19 @@
 package tiralabra.datacompressor.appfeatures;
 
+import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
+ * Class for custom byte writing and handling.
  *
  * @author ode
  */
@@ -12,8 +22,10 @@ public class ByteHandler {
     private byte[] inputArray;
     private byte[] outputArray;
     private HashMap<Byte, String> currentDictionary;
+    private final File resultFile;
 
     public ByteHandler() {
+        resultFile = new File(System.getProperty("user.home")+"/result.txt");
     }
 
     public void setInputArray(byte[] inputArray) {
@@ -24,31 +36,104 @@ public class ByteHandler {
         this.currentDictionary = currentDictionary;
     }
 
+    /**
+     * Method for writing packed file.
+     */
     public void writeOutput() {
+        //ArrayList containing output bytes in string form
         ArrayList<String> bytesAsStrings = new ArrayList<>();
+
+        //Strign s contains one big string for output bytes up to 1 kB
         String s = "";
         int n = 0;
+        System.out.println("Starting to translate...");
+        int totalSize = inputArray.length;
+        NumberFormat nf = new DecimalFormat("#0.00");
         for (byte b : inputArray) {
-            if (n%1024 == 0 && n!= 0) {
-                addBytesToArray(s, bytesAsStrings);
-                s = "";
-                System.out.println("Compressed: "+n/1024+" kb");
+            if (s.length() >= 8192) {
+                //When 1 kB is filled method for adding bytes in array is called
+                String y = s.substring(0, 8192);
+                addBytesToArray(y, bytesAsStrings);
+                y = s.substring(8192);
+                s = ""+y;
+                double progress = ((n*100.0)/totalSize);
+                System.out.println(nf.format(progress) + " % done");
             }
             s += currentDictionary.get(b);
             n++;
         }
         addBytesToArray(s, bytesAsStrings);
+        System.out.println("Done!");
         makeOutput(bytesAsStrings);
     }
 
-    private void makeOutput(ArrayList<String> bytesAsStrings) {
-        int n = 0;
-        Byte b;
-        for (String s : bytesAsStrings) {
-           b = makeByte(s);
+    /**
+     * Method for making String object from each output byte. Parameter s
+     * contains String for up to 1 kB of input file translated with dictionary.
+     * Method splits that String into 8 bit (mark) Strings and adds them into
+     * bytesAsString array.
+     *
+     * @param s
+     * @param bytesAsStrings
+     */
+    private void addBytesToArray(String s, ArrayList<String> bytesAsStrings) {
+        if (s == null) {
+            return;
+        }
+        //8 mark Strings for each byte
+        String x = "" + s.charAt(0);
+        for (int i = 1; i < s.length(); i++) {
+            x += s.charAt(i);
+            if (i % 8 == 0) {
+                bytesAsStrings.add(x);
+                x = "";
+            }
+        }
+        //If last String is less than 8 marks adds extra '0's at the end of
+        //String. Note that this only happens at the last call of this method 
+        //for every compression since previous calls each had 8192 marks (1 kB)
+        if (x.length() > 0) {
+            while (x.length() <= 8) {
+                x += "0";
+            }
+            bytesAsStrings.add(x);
         }
     }
 
+    /**
+     * Makes byte array output from Strings in bytesAsString.
+     *
+     * @param bytesAsStrings
+     */
+    private void makeOutput(ArrayList<String> bytesAsStrings) {
+        int n = 0;
+        Byte b;
+        //Calculating output array size.
+        int size = bytesAsStrings.size();
+        outputArray = new byte[size];
+
+        System.out.println("Final size will be "+(size/(1024 * 1.0))+" kB");
+        //Making Bytes and addding them into output array.
+        System.out.println("Making final file...");
+        for (String s : bytesAsStrings) {
+            b = makeByte(s);
+            outputArray[n] = b;
+            n++;
+        }
+        try {
+            makeFile();
+        } catch (IOException ex) {
+            Logger.getLogger(ByteHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Method for making actual Bytes from bytesAsStrings array. Writes in two's
+     * complement form.
+     *
+     * @param s
+     * @return
+     */
     private Byte makeByte(String s) {
         Byte b;
         boolean negative = false;
@@ -69,21 +154,15 @@ public class ByteHandler {
         return b;
     }
 
-    private void addBytesToArray(String s, ArrayList<String> bytesAsStrings) {
-        if (s == null) return;
-        String x = "" + s.charAt(0);
-        for (int i = 1; i < s.length(); i++) {
-            x += s.charAt(i);
-            if (i % 8 == 0) {
-                bytesAsStrings.add(x);
-                x = "";
-            }
+    private void makeFile() throws FileNotFoundException, IOException {
+        if (outputArray == null) {
+            return;
         }
-        if (x.length() > 0) {
-            while (x.length() < 8) {
-                x += "0";
-            }
-            bytesAsStrings.add(x);
-        }
+        System.out.println("Writing outputfile..");
+        FileOutputStream fos = new FileOutputStream(resultFile);
+        fos.write(outputArray);
+        fos.close();
+        System.out.println("Output stream closed!");
+        System.out.println("File written at /home/result.txt!");
     }
 }
