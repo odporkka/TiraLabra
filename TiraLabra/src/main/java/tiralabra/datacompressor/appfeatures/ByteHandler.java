@@ -1,16 +1,17 @@
 package tiralabra.datacompressor.appfeatures;
 
-import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tiralabra.datacompressor.appfeatures.huffman.HuffmanDictionary;
 
 /**
  * Class for custom byte writing and handling.
@@ -23,9 +24,10 @@ public class ByteHandler {
     private byte[] outputArray;
     private HashMap<Byte, String> currentDictionary;
     private final File resultFile;
+    private String header;
 
     public ByteHandler() {
-        resultFile = new File(System.getProperty("user.home")+"/result.txt");
+        resultFile = new File(System.getProperty("user.home") + "/result.txt");
     }
 
     public void setInputArray(byte[] inputArray) {
@@ -38,10 +40,17 @@ public class ByteHandler {
 
     /**
      * Method for writing packed file.
+     *
+     * @param header
      */
-    public void writeOutput() {
+    public void writeOutput(String header) {
         //ArrayList containing output bytes in string form
         ArrayList<String> bytesAsStrings = new ArrayList<>();
+
+        //Adding header if needed
+        if (header != null) {
+            this.header = header;
+        }
 
         //Strign s contains one big string for output bytes up to 1 kB
         String s = "";
@@ -55,8 +64,8 @@ public class ByteHandler {
                 String y = s.substring(0, 8192);
                 addBytesToArray(y, bytesAsStrings);
                 y = s.substring(8192);
-                s = ""+y;
-                double progress = ((n*100.0)/totalSize);
+                s = "" + y;
+                double progress = ((n * 100.0) / totalSize);
                 System.out.println(nf.format(progress) + " % done");
             }
             s += currentDictionary.get(b);
@@ -64,6 +73,8 @@ public class ByteHandler {
         }
         addBytesToArray(s, bytesAsStrings);
         System.out.println("Done!");
+        System.out.println(bytesAsStrings.get(0));
+        System.out.println(bytesAsStrings.get(1));
         makeOutput(bytesAsStrings);
     }
 
@@ -81,13 +92,13 @@ public class ByteHandler {
             return;
         }
         //8 mark Strings for each byte
-        String x = "" + s.charAt(0);
-        for (int i = 1; i < s.length(); i++) {
-            x += s.charAt(i);
-            if (i % 8 == 0) {
+        String x = "";
+        for (int i = 0; i < s.length(); i++) {
+            if (i % 8 == 0 && i!=0) {
                 bytesAsStrings.add(x);
                 x = "";
             }
+            x += s.charAt(i);
         }
         //If last String is less than 8 marks adds extra '0's at the end of
         //String. Note that this only happens at the last call of this method 
@@ -112,7 +123,7 @@ public class ByteHandler {
         int size = bytesAsStrings.size();
         outputArray = new byte[size];
 
-        System.out.println("Final size will be "+(size/(1024 * 1.0))+" kB");
+        System.out.println("Final size will be " + (size / (1024 * 1.0)) + " kB");
         //Making Bytes and addding them into output array.
         System.out.println("Making final file...");
         for (String s : bytesAsStrings) {
@@ -146,23 +157,86 @@ public class ByteHandler {
             if (!negative && s.charAt(i) == '1') {
                 sum += Math.pow(2.0, power);
             } else if (negative && s.charAt(i) == '0') {
-                sum += Math.pow(2.0, power) * -1;
+                sum += Math.pow(2.0, power);
             }
             power++;
+        }
+        if (negative){
+            sum+=1;
+            sum = sum * (-1);
         }
         b = new Byte("" + sum);
         return b;
     }
 
+    /**
+     * Makes the actual compressed file. Imports header for dictionary if set.
+     *
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     private void makeFile() throws FileNotFoundException, IOException {
         if (outputArray == null) {
             return;
         }
         System.out.println("Writing outputfile..");
         FileOutputStream fos = new FileOutputStream(resultFile);
+        
+        if (header != null) {
+            fos.write(header.getBytes(Charset.defaultCharset()));
+        }
+        
         fos.write(outputArray);
         fos.close();
         System.out.println("Output stream closed!");
         System.out.println("File written at /home/result.txt!");
+        System.out.println("\n");
+        System.out.println("--------");
+        System.out.println("\n");
+    }
+
+    public String getByteString(byte[] byteArray) {
+        String result = "";
+        for (byte c : byteArray) {
+            result += getStringFromByte(c);
+        }
+        return result;
+    }
+
+    private String getStringFromByte(Byte b) {
+        String byteAsString = "";
+        boolean negative = true;
+        int value = b.intValue();
+        if (value >= 0) {
+            negative = false;
+            byteAsString += '0';
+        } else {
+            byteAsString += '1';
+            value = value * (-1);
+        }
+
+        int power = 64;
+        if (!negative) {
+            for (int i = 0; i < 7; i++) {
+                if (value >= power) {
+                    byteAsString += '1';
+                    value -= power;
+                } else byteAsString += '0';
+                power = power/2;
+            }
+        }
+        if (negative){
+            value -= 1;
+            power = 64;
+            for (int i = 0; i < 7; i++) {
+                if (value >= power) {
+                    byteAsString += '0';
+                    value -= power;
+                } else byteAsString += '1';
+                power = power/2;
+            }
+            
+        }
+        return byteAsString;
     }
 }

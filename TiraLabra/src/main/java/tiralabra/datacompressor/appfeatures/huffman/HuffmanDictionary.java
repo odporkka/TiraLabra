@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class HuffmanDictionary {
 
-    private final HashMap<String, Byte> dictionary;
+    private HashMap<String, Byte> dictionary;
     private final HashMap<Byte, String> dictionaryByByte;
     private final ArrayList<String> bitCombinations;
     private final byte[] byteArray;
@@ -32,6 +32,14 @@ public class HuffmanDictionary {
         makeBitCombs();
         countBytes();
         makeDictionary();
+    }
+    
+    public HuffmanDictionary(HashMap<String, Byte> dict, byte [] byteArray){
+        this.dictionary = dict;
+        this.dictionaryByByte = new HashMap<>(256);
+        this.bitCombinations = new ArrayList<>();
+        this.byteArray = byteArray;
+        this.bytesByCount = new HashMap<>();
     }
 
     /**
@@ -110,7 +118,7 @@ public class HuffmanDictionary {
     /**
      * Test method for printing dictionary.
      */
-    private void printDictionary() {
+    public void printDictionary() {
         Set<String> keySet = dictionary.keySet();
         for (String key : keySet) {
             System.out.println(dictionary.get(key) + ": " + key);
@@ -139,6 +147,22 @@ public class HuffmanDictionary {
         return dictionaryByByte;
     }
     
+    public String getDictionaryAsString(){
+        if (dictionary==null){
+            return null;
+        }
+        String s = "HUFF:\n";
+        Set<String> keySet = this.dictionary.keySet();
+        for (String key : keySet) {
+            s+=key;
+            s+=" ";
+            s+=this.dictionary.get(key);
+            s+="\n";
+        }
+        s+="END\n";
+        return s;
+    }
+    
     public Byte check(BitSet bs){
         Byte b = null;
         String s = "";
@@ -147,5 +171,26 @@ public class HuffmanDictionary {
             else s+=0;     
         }
         return b;
+    }
+
+    public void setDictionary(HashMap<String, Byte> dict) {
+        this.dictionary = dict;
+    }
+
+    public void extract(String byteString) {
+        System.out.println(byteString);
+        String current = "";
+        String twoLast = "";
+        for (int i = 0; i < byteString.length(); i++) {
+            current += byteString.charAt(i);
+            if (current.length() >=2){
+                twoLast = current.substring(current.length()-2, current.length());
+            }
+            if (twoLast.equals("00") ||  twoLast.equals("01")){           
+                System.out.println(this.dictionary.get(current));
+                current = "";
+                twoLast = "";
+            }
+        }
     }
 }

@@ -33,7 +33,7 @@ public class FileManager {
         this.error = false;
         this.bh = new ByteHandler();
         this.huffmanCompressor = new HuffmanCompressor(bh);
-        
+
     }
 
     /**
@@ -63,12 +63,13 @@ public class FileManager {
 
     /**
      * Returns current file as string.
+     *
      * @return String of current file
      */
     public String getFileAsString() {
         return fileAsString;
     }
-    
+
     /**
      * Returns path to current capsuled file.
      *
@@ -80,26 +81,21 @@ public class FileManager {
         }
         return this.fileLabel;
     }
-    
+
     /**
      * Method for Huffman compressing and extracting.
+     *
      * @return Boolean t, True if succeeded and false if not
      */
-    public boolean huffmanCompress(){
-        if (this.fileAsByteArray == null){
+    public boolean huffmanCompress() {
+        if (this.fileAsByteArray == null) {
             this.fileLabel = "Set file first!";
             this.error = true;
             return false;
         }
         huffmanCompressor.setByteArray(this.fileAsByteArray);
-        File result = huffmanCompressor.compress();
+        huffmanCompressor.compress();
         return true;
-    }
-
-    /**
-     * Method to write to file. Not yet implemented.
-     */
-    private void writeToFile(File f) {
     }
 
     /**
@@ -119,6 +115,7 @@ public class FileManager {
             return;
         }
 
+        //test print byte[]
         printByteArray(this.fileAsByteArray);
         //convert byte array to string, some characters will be unknown
         //if format is different
@@ -129,6 +126,7 @@ public class FileManager {
         } else {
             System.out.println(s);
         }
+        System.out.println("-----\n");
         this.error = false;
         this.fileAsString = s;
     }
@@ -178,19 +176,44 @@ public class FileManager {
 
     /**
      * Prints bytes in array. For testing purposes only.
+     *
      * @param array Byte array
      */
     private void printByteArray(byte[] array) {
         int n = 0;
         for (byte b : array) {
-            System.out.print((String.format("%4d", b))+" ");
+            System.out.print((String.format("%4d", b)) + " ");
             n++;
-            if (n%4 == 0) System.out.print("  ");
-            if (n%8 == 0) {
+            if (n % 4 == 0) {
+                System.out.print("  ");
+            }
+            if (n % 8 == 0) {
                 System.out.print("\n");
             }
-            if (n==80) break;
+            if (n == 80) {
+                break;
+            }
         }
     }
-    
+
+    public boolean extract() {
+        if (this.curFile == null) {
+            this.fileLabel = "No file set!";
+            this.error = true;
+            return false;
+        }
+        System.out.println("Checking coding for: " + this.fileLabel);
+        String coding = this.fileAsString.substring(0, 4);
+        if (coding.equals("HUFF")) {
+            System.out.println("File " + this.fileLabel + " coded in Huffman...");
+            this.huffmanCompressor.readDictionary(this.fileAsString);
+            System.out.println("Extracting file...");
+            this.huffmanCompressor.extractByteArray();
+            System.out.println("Done!");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

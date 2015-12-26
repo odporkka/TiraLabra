@@ -65,9 +65,11 @@ public class MainWindow implements Runnable {
         JComboBox<String> selectCoding = new JComboBox<>(options);
         CompressListener compListener = new CompressListener(this.fmgr, 
                 selectCoding, currentFileLabel);
-        JButton deCompressButton = new JButton("Extract!");
+        ExtractListener extListener = new ExtractListener(this.fmgr, currentFileLabel);
+        JButton extractButton = new JButton("Extract!");
         JButton compressButton = new JButton("Compress!");
         compressButton.addActionListener(compListener);
+        extractButton.addActionListener(extListener);
         
         //adding content to main panel
         mainPanel.add(currentFile);
@@ -76,7 +78,7 @@ public class MainWindow implements Runnable {
         mainPanel.add(changeFile);
         mainPanel.add(currentCoding);
         mainPanel.add(selectCoding);
-        mainPanel.add(deCompressButton);
+        mainPanel.add(extractButton);
         mainPanel.add(compressButton);
         
         //adding main panel to frame
