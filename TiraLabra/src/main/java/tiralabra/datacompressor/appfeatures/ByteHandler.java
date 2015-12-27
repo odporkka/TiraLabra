@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tiralabra.datacompressor.appfeatures.huffman.HuffmanDictionary;
 
 /**
  * Class for custom byte writing and handling.
@@ -23,11 +22,12 @@ public class ByteHandler {
     private byte[] inputArray;
     private byte[] outputArray;
     private HashMap<Byte, String> currentDictionary;
-    private final File resultFile;
+    private File resultFile;
+    private File extractFile;
     private String header;
+    private String fileExt;
 
     public ByteHandler() {
-        resultFile = new File(System.getProperty("user.home") + "/result.txt");
     }
 
     public void setInputArray(byte[] inputArray) {
@@ -36,6 +36,14 @@ public class ByteHandler {
 
     public void setCurrentDictionary(HashMap<Byte, String> currentDictionary) {
         this.currentDictionary = currentDictionary;
+    }
+
+    public void setFileExt(String fileExt) {
+        this.fileExt = fileExt;
+    }
+
+    public String getFileExt() {
+        return fileExt;
     }
 
     /**
@@ -94,7 +102,7 @@ public class ByteHandler {
         //8 mark Strings for each byte
         String x = "";
         for (int i = 0; i < s.length(); i++) {
-            if (i % 8 == 0 && i!=0) {
+            if (i % 8 == 0 && i != 0) {
                 bytesAsStrings.add(x);
                 x = "";
             }
@@ -161,8 +169,8 @@ public class ByteHandler {
             }
             power++;
         }
-        if (negative){
-            sum+=1;
+        if (negative) {
+            sum += 1;
             sum = sum * (-1);
         }
         b = new Byte("" + sum);
@@ -180,16 +188,17 @@ public class ByteHandler {
             return;
         }
         System.out.println("Writing outputfile..");
+        resultFile = new File(System.getProperty("user.home") + "/result" + fileExt);
         FileOutputStream fos = new FileOutputStream(resultFile);
-        
+
         if (header != null) {
             fos.write(header.getBytes(Charset.defaultCharset()));
         }
-        
+
         fos.write(outputArray);
         fos.close();
         System.out.println("Output stream closed!");
-        System.out.println("File written at /home/result.txt!");
+        System.out.println("File written at /home/result"+this.fileExt);
         System.out.println("\n");
         System.out.println("--------");
         System.out.println("\n");
@@ -221,22 +230,43 @@ public class ByteHandler {
                 if (value >= power) {
                     byteAsString += '1';
                     value -= power;
-                } else byteAsString += '0';
-                power = power/2;
+                } else {
+                    byteAsString += '0';
+                }
+                power = power / 2;
             }
         }
-        if (negative){
+        if (negative) {
             value -= 1;
             power = 64;
             for (int i = 0; i < 7; i++) {
                 if (value >= power) {
                     byteAsString += '0';
                     value -= power;
-                } else byteAsString += '1';
-                power = power/2;
+                } else {
+                    byteAsString += '1';
+                }
+                power = power / 2;
             }
-            
+
         }
         return byteAsString;
+    }
+
+    public void setOutputArray(byte[] outputArray) {
+        this.outputArray = outputArray;
+    }
+
+    public void writeExtracted() throws IOException {
+        try {
+            extractFile = new File(System.getProperty("user.home") + "/extracted"
+            +this.fileExt);
+            FileOutputStream fos = new FileOutputStream(extractFile);
+            fos.write(outputArray);
+            fos.close();
+            System.out.println("File extracted at: " + extractFile.getAbsolutePath());
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ByteHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

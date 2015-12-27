@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Scanner;
 import tiralabra.datacompressor.appfeatures.huffman.HuffmanCompressor;
 
@@ -44,8 +45,11 @@ public class FileManager {
      */
     public void setFile(File f) {
         this.curFile = f;
-        this.fileLabel = f.getAbsolutePath();
+        String filepath = f.getAbsolutePath();
+        this.fileLabel = filepath;
         System.out.println("File changed to: " + this.fileLabel);
+        String ext = filepath.substring(filepath.length()-4, filepath.length());
+        this.bh.setFileExt(ext);
         readFile();
     }
 

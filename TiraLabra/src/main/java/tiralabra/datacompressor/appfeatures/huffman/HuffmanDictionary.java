@@ -22,6 +22,7 @@ public class HuffmanDictionary {
     private final ArrayList<String> bitCombinations;
     private final byte[] byteArray;
     private final HashMap<Byte, Long> bytesByCount;
+    private ArrayList<Byte> extracted;
 
     public HuffmanDictionary(byte[] byteArray) {
         this.dictionary = new HashMap<>(256);
@@ -29,6 +30,7 @@ public class HuffmanDictionary {
         this.bitCombinations = new ArrayList<>();
         this.byteArray = byteArray;
         this.bytesByCount = new HashMap<>();
+        this.extracted = new ArrayList<>();
         makeBitCombs();
         countBytes();
         makeDictionary();
@@ -40,6 +42,7 @@ public class HuffmanDictionary {
         this.bitCombinations = new ArrayList<>();
         this.byteArray = byteArray;
         this.bytesByCount = new HashMap<>();
+        this.extracted = new ArrayList<>();
     }
 
     /**
@@ -61,7 +64,6 @@ public class HuffmanDictionary {
             bitCombinations.add(bitString);
             bitString = "";
         }
-
         for (int i = 0; i < 126; i++) {
             bitString += 1;
         }
@@ -147,11 +149,10 @@ public class HuffmanDictionary {
         return dictionaryByByte;
     }
     
-    public String getDictionaryAsString(){
+    public String getHeaderString(String s){
         if (dictionary==null){
             return null;
         }
-        String s = "HUFF:\n";
         Set<String> keySet = this.dictionary.keySet();
         for (String key : keySet) {
             s+=key;
@@ -177,8 +178,7 @@ public class HuffmanDictionary {
         this.dictionary = dict;
     }
 
-    public void extract(String byteString) {
-        System.out.println(byteString);
+    public String extract(String byteString) {
         String current = "";
         String twoLast = "";
         for (int i = 0; i < byteString.length(); i++) {
@@ -186,11 +186,26 @@ public class HuffmanDictionary {
             if (current.length() >=2){
                 twoLast = current.substring(current.length()-2, current.length());
             }
-            if (twoLast.equals("00") ||  twoLast.equals("01")){           
-                System.out.println(this.dictionary.get(current));
+            if (twoLast.equals("00") ||  twoLast.equals("01")){
+                extracted.add(this.dictionary.get(current));
+                
+                if (this.dictionary.get(current) == null){
+                    System.out.println(current);
+                }
+                
+                current = "";
+                twoLast = "";
+            }
+            if (current.length()==128){
+                extracted.add(this.dictionary.get(current));
                 current = "";
                 twoLast = "";
             }
         }
+        return current;
+    }
+
+    public ArrayList<Byte> getExtracted() {
+        return extracted;
     }
 }
