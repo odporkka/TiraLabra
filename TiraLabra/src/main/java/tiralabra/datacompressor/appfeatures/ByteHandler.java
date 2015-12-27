@@ -13,7 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Class for custom byte writing and handling.
+ * Class for custom byte writing and handling. Writes packed and extracted
+ * files. Holds byte arrays for input and output. Also dictionary for byte
+ * operations.
  *
  * @author ode
  */
@@ -30,6 +32,7 @@ public class ByteHandler {
     public ByteHandler() {
     }
 
+    //Getters and setters:
     public void setInputArray(byte[] inputArray) {
         this.inputArray = inputArray;
     }
@@ -42,16 +45,44 @@ public class ByteHandler {
         this.fileExt = fileExt;
     }
 
+    public void setOutputArray(byte[] outputArray) {
+        this.outputArray = outputArray;
+    }
+
     public String getFileExt() {
         return fileExt;
     }
 
     /**
-     * Method for writing packed file.
-     *
-     * @param header
+     * Method for translating byte[] into one big String containing bytes
+     * in a row in a String form. Used by some other classed when extracting
+     * packed file. Class calling this method is responsible for parameter size
+     * thus also responsible that result fits into String object.
+     * @param byteArray
+     * @return String
      */
-    public void writeOutput(String header) {
+    public String getByteString(byte[] byteArray) {
+        String result = "";
+        for (byte c : byteArray) {
+            result += getStringFromByte(c);
+        }
+        return result;
+    }
+
+    /**
+     * Method for writing packed file. Uses inputArray as input (inputArray is 
+     * set when file is chosen). Then translates it into Strings according to 
+     * set dictionary. Strings are split into 8-mark substrings and 
+     * translated into bytes which are then put into outputArray. Finally
+     * outputArray is written into /extracted.ext file located in users home
+     * folder.
+     *
+     * Adds header if given. Also might cause errors if there is no permissions
+     * to write into home folder.
+     * 
+     * @param header String for header which is added in front of file if needed
+     */
+    public void writePackedFile(String header) {
         //ArrayList containing output bytes in string form
         ArrayList<String> bytesAsStrings = new ArrayList<>();
 
@@ -83,7 +114,28 @@ public class ByteHandler {
         System.out.println("Done!");
         System.out.println(bytesAsStrings.get(0));
         System.out.println(bytesAsStrings.get(1));
-        makeOutput(bytesAsStrings);
+        makeOutputArray(bytesAsStrings);
+    }
+
+    /**
+     * Method for writing extracted file. Does not actually extract, only
+     * handles writing into file after outputArray is set by some other class
+     * responsible for extracting. Throws exception if needed (no permission, 
+     * out of mem etc.)
+     * 
+     * @throws IOException Exception if file write failed.
+     */
+    public void writeExtractedFile() throws IOException {
+        try {
+            extractFile = new File(System.getProperty("user.home") + "/extracted"
+                    + this.fileExt);
+            FileOutputStream fos = new FileOutputStream(extractFile);
+            fos.write(outputArray);
+            fos.close();
+            System.out.println("File extracted at: " + extractFile.getAbsolutePath());
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ByteHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -120,75 +172,47 @@ public class ByteHandler {
     }
 
     /**
-     * Makes byte array output from Strings in bytesAsString.
+     * Makes byte array output from Strings in bytesAsString. Calls private
+     * method writePackedFile() after Strings in bytesAsStrings are imported as
+     * bytes in byte[] outputArray.
      *
      * @param bytesAsStrings
      */
-    private void makeOutput(ArrayList<String> bytesAsStrings) {
+    private void makeOutputArray(ArrayList<String> bytesAsStrings) {
         int n = 0;
         Byte b;
         //Calculating output array size.
         int size = bytesAsStrings.size();
         outputArray = new byte[size];
 
-        System.out.println("Final size will be " + (size / (1024 * 1.0)) + " kB");
+        System.out.println("Final size will be " + (size / (1024 * 1.0)) + " kB"
+                + " + header if needed");
         //Making Bytes and addding them into output array.
         System.out.println("Making final file...");
         for (String s : bytesAsStrings) {
-            b = makeByte(s);
+            b = getByteFromString(s);
             outputArray[n] = b;
             n++;
         }
         try {
-            makeFile();
+            this.makePackedFile();
         } catch (IOException ex) {
             Logger.getLogger(ByteHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     /**
-     * Method for making actual Bytes from bytesAsStrings array. Writes in two's
-     * complement form.
-     *
-     * @param s
-     * @return
-     */
-    private Byte makeByte(String s) {
-        Byte b;
-        boolean negative = false;
-        int sum = 0;
-        if (s.charAt(0) == '1') {
-            negative = true;
-        }
-        int power = 0;
-        for (int i = 7; i > 0; i--) {
-            if (!negative && s.charAt(i) == '1') {
-                sum += Math.pow(2.0, power);
-            } else if (negative && s.charAt(i) == '0') {
-                sum += Math.pow(2.0, power);
-            }
-            power++;
-        }
-        if (negative) {
-            sum += 1;
-            sum = sum * (-1);
-        }
-        b = new Byte("" + sum);
-        return b;
-    }
-
-    /**
-     * Makes the actual compressed file. Imports header for dictionary if set.
+     * Makes the actual compressed file. Includes header for dictionary if set.
      *
      * @throws FileNotFoundException
      * @throws IOException
      */
-    private void makeFile() throws FileNotFoundException, IOException {
+    private void makePackedFile() throws FileNotFoundException, IOException {
         if (outputArray == null) {
             return;
         }
         System.out.println("Writing outputfile..");
-        resultFile = new File(System.getProperty("user.home") + "/result" + fileExt);
+        resultFile = new File(System.getProperty("user.home") + "/packed" + fileExt);
         FileOutputStream fos = new FileOutputStream(resultFile);
 
         if (header != null) {
@@ -198,20 +222,19 @@ public class ByteHandler {
         fos.write(outputArray);
         fos.close();
         System.out.println("Output stream closed!");
-        System.out.println("File written at /home/result"+this.fileExt);
+        System.out.println("File written at /home/packed" + this.fileExt);
         System.out.println("\n");
         System.out.println("--------");
         System.out.println("\n");
     }
 
-    public String getByteString(byte[] byteArray) {
-        String result = "";
-        for (byte c : byteArray) {
-            result += getStringFromByte(c);
-        }
-        return result;
-    }
-
+    /**
+     * Private method for conversion between two's complement byte value and 8
+     * mark String matching the 8-bit form for that value.
+     *
+     * @param b Byte from which String form is calculated.
+     * @return String s matching the 8-bit form of byte
+     */
     private String getStringFromByte(Byte b) {
         String byteAsString = "";
         boolean negative = true;
@@ -253,20 +276,34 @@ public class ByteHandler {
         return byteAsString;
     }
 
-    public void setOutputArray(byte[] outputArray) {
-        this.outputArray = outputArray;
-    }
-
-    public void writeExtracted() throws IOException {
-        try {
-            extractFile = new File(System.getProperty("user.home") + "/extracted"
-            +this.fileExt);
-            FileOutputStream fos = new FileOutputStream(extractFile);
-            fos.write(outputArray);
-            fos.close();
-            System.out.println("File extracted at: " + extractFile.getAbsolutePath());
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ByteHandler.class.getName()).log(Level.SEVERE, null, ex);
+    /**
+     * Method for making actual Bytes from bytesAsStrings array. Writes in two's
+     * complement form. Private method used by makeOutput().
+     *
+     * @param s
+     * @return
+     */
+    private Byte getByteFromString(String s) {
+        Byte b;
+        boolean negative = false;
+        int sum = 0;
+        if (s.charAt(0) == '1') {
+            negative = true;
         }
+        int power = 0;
+        for (int i = 7; i > 0; i--) {
+            if (!negative && s.charAt(i) == '1') {
+                sum += Math.pow(2.0, power);
+            } else if (negative && s.charAt(i) == '0') {
+                sum += Math.pow(2.0, power);
+            }
+            power++;
+        }
+        if (negative) {
+            sum += 1;
+            sum = sum * (-1);
+        }
+        b = new Byte("" + sum);
+        return b;
     }
 }

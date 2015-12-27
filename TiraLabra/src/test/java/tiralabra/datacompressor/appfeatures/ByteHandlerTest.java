@@ -65,14 +65,14 @@ public class ByteHandlerTest {
     }
 
     /**
-     * Test of writeOutput method, of class ByteHandler.
+     * Test of writePackedFile method, of class ByteHandler.
      */
     @Test
     public void testWriteOutput() {
         System.out.println("writeOutput");
         String header = "";
         ByteHandler instance = new ByteHandler();
-        instance.writeOutput(header);
+        instance.writePackedFile(header);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }

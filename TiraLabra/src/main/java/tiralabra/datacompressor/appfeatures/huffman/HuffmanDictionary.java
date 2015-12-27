@@ -6,7 +6,6 @@
 package tiralabra.datacompressor.appfeatures.huffman;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -20,10 +19,16 @@ public class HuffmanDictionary {
     private HashMap<String, Byte> dictionary;
     private final HashMap<Byte, String> dictionaryByByte;
     private final ArrayList<String> bitCombinations;
-    private final byte[] byteArray;
+    private byte[] byteArray;
     private final HashMap<Byte, Long> bytesByCount;
-    private ArrayList<Byte> extracted;
+    private final ArrayList<Byte> extracted;
 
+    /**
+     * First constructor for dictionary. Called when packing.
+     * Takes byte[] of file as parameter and then constructs dictionary from it.
+     * 
+     * @param byteArray 
+     */
     public HuffmanDictionary(byte[] byteArray) {
         this.dictionary = new HashMap<>(256);
         this.dictionaryByByte = new HashMap<>(256);
@@ -36,6 +41,13 @@ public class HuffmanDictionary {
         makeDictionary();
     }
     
+    /**
+     * Second constructor for dictionary. Called when extracting. 
+     * Takes byte[] of file and dictionary read from start of file as parameters. 
+     * 
+     * @param dict Dictionary stripped off from start of file
+     * @param byteArray File as byte array
+     */
     public HuffmanDictionary(HashMap<String, Byte> dict, byte [] byteArray){
         this.dictionary = dict;
         this.dictionaryByByte = new HashMap<>(256);
@@ -45,6 +57,80 @@ public class HuffmanDictionary {
         this.extracted = new ArrayList<>();
     }
 
+    //setters and getters
+    public void setByteArray(byte[] byteArray) {
+        this.byteArray = byteArray;
+    }
+    
+    public void setDictionary(HashMap<String, Byte> dict) {
+        this.dictionary = dict;
+    }
+    
+    public ArrayList<Byte> getExtractedByteArray() {
+        return extracted;
+    }
+    
+    public HashMap<Byte, String> getDictionaryByByte() {
+        return dictionaryByByte;
+    }
+    
+    /**
+     * Returns header for packed file. Contains dictionary for decoding.
+     * 
+     * @param s Start of string to which dictionary is appended
+     * @return String for header
+     */
+    public String getHeaderString(String s){
+        if (dictionary==null){
+            return null;
+        }
+        Set<String> keySet = this.dictionary.keySet();
+        for (String key : keySet) {
+            s+=key;
+            s+=" ";
+            s+=this.dictionary.get(key);
+            s+="\n";
+        }
+        s+="END\n";
+        return s;
+    }
+
+    /**
+     * Method for decoding Huffman coded file. Reads bytes from parameter String
+     * containing coded bytes in a row. When full byte is found its translated
+     * and added to byte array called extracted. If last byte isn't completed 
+     * it's returned.
+     * 
+     * @param byteString String containing coded bytes in a string form
+     * @return String containing leftover if last byte wasn't complete
+     */
+    public String extract(String byteString) {
+        String current = "";
+        String twoLast = "";
+        for (int i = 0; i < byteString.length(); i++) {
+            current += byteString.charAt(i);
+            if (current.length() >=2){
+                twoLast = current.substring(current.length()-2, current.length());
+            }
+            if (twoLast.equals("00") ||  twoLast.equals("01")){
+                extracted.add(this.dictionary.get(current));
+                
+                if (this.dictionary.get(current) == null){
+                    System.out.println(current);
+                }
+                
+                current = "";
+                twoLast = "";
+            }
+            if (current.length()==128){
+                extracted.add(this.dictionary.get(current));
+                current = "";
+                twoLast = "";
+            }
+        }
+        return current;
+    }
+    
     /**
      * Makes all possible bit combinations for 256 mark Huffman coding. Stored
      * as Strings in ArrayList. Each String represents one "leaf" of
@@ -118,17 +204,7 @@ public class HuffmanDictionary {
     }
 
     /**
-     * Test method for printing dictionary.
-     */
-    public void printDictionary() {
-        Set<String> keySet = dictionary.keySet();
-        for (String key : keySet) {
-            System.out.println(dictionary.get(key) + ": " + key);
-        }
-    }
-
-    /**
-     * Finds most common byte in bytesByCount. Used when making vocabulary.
+     * Finds most common byte in bytesByCount. Used when making dictionary.
      *
      * @return Byte b
      */
@@ -144,68 +220,17 @@ public class HuffmanDictionary {
         b = max.getKey();
         return b;
     }
-
-    public HashMap<Byte, String> getDictionaryByByte() {
-        return dictionaryByByte;
-    }
     
-    public String getHeaderString(String s){
-        if (dictionary==null){
-            return null;
-        }
-        Set<String> keySet = this.dictionary.keySet();
+    
+    //Test methods:
+    
+    /**
+     * Test method for printing dictionary.
+     */
+    public void printDictionary() {
+        Set<String> keySet = dictionary.keySet();
         for (String key : keySet) {
-            s+=key;
-            s+=" ";
-            s+=this.dictionary.get(key);
-            s+="\n";
+            System.out.println(dictionary.get(key) + ": " + key);
         }
-        s+="END\n";
-        return s;
-    }
-    
-    public Byte check(BitSet bs){
-        Byte b = null;
-        String s = "";
-        for (int i = 0; i < bs.size(); i++) {
-            if (bs.get(i) == true) s+= 1;
-            else s+=0;     
-        }
-        return b;
-    }
-
-    public void setDictionary(HashMap<String, Byte> dict) {
-        this.dictionary = dict;
-    }
-
-    public String extract(String byteString) {
-        String current = "";
-        String twoLast = "";
-        for (int i = 0; i < byteString.length(); i++) {
-            current += byteString.charAt(i);
-            if (current.length() >=2){
-                twoLast = current.substring(current.length()-2, current.length());
-            }
-            if (twoLast.equals("00") ||  twoLast.equals("01")){
-                extracted.add(this.dictionary.get(current));
-                
-                if (this.dictionary.get(current) == null){
-                    System.out.println(current);
-                }
-                
-                current = "";
-                twoLast = "";
-            }
-            if (current.length()==128){
-                extracted.add(this.dictionary.get(current));
-                current = "";
-                twoLast = "";
-            }
-        }
-        return current;
-    }
-
-    public ArrayList<Byte> getExtracted() {
-        return extracted;
     }
 }

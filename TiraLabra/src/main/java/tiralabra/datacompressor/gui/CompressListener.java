@@ -8,8 +8,7 @@ import javax.swing.JLabel;
 import tiralabra.datacompressor.appfeatures.FileManager;
 
 /**
- *
- * @author ode
+ * Compress button listener.
  */
 public class CompressListener implements ActionListener {
 

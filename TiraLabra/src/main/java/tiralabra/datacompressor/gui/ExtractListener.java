@@ -8,8 +8,7 @@ import javax.swing.JLabel;
 import tiralabra.datacompressor.appfeatures.FileManager;
 
 /**
- *
- * @author ode
+ * Extract button listener.
  */
 public class ExtractListener implements ActionListener {
 

@@ -1,7 +1,6 @@
 package tiralabra.datacompressor.appfeatures.huffman;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -22,6 +21,11 @@ public class HuffmanCompressor {
         this.byteArray = byteArray;
     }
 
+    /**
+     * Method for compressing. Makes new dictionary for current file. Then
+     * passes made dictionary to ByteHandler class for file writing and coding.
+     * Dictionary is passed as string named header.
+     */
     public void compress() {
         this.dictionary = new HuffmanDictionary(byteArray);
         this.bh.setInputArray(byteArray);
@@ -29,7 +33,7 @@ public class HuffmanCompressor {
         System.out.println("Making header...");
         String header = "HUFF: "+this.bh.getFileExt()+"\n";
         header = this.dictionary.getHeaderString(header);
-        this.bh.writeOutput(header);
+        this.bh.writePackedFile(header);
     }
 
     /**
@@ -46,18 +50,25 @@ public class HuffmanCompressor {
         System.out.println(ext);
         this.bh.setFileExt(ext);
         HashMap<String, Byte> dict = new HashMap<>();
+        int index;
+        
+        //reading dictionary off from start of file
         while (true) {
             String key = scanner.next();
             if (key.equals("END")) {
-                int index = fileAsString.indexOf(key);
-                index += 4;
-                fileAsString = fileAsString.substring(index);
-                byteArray = fileAsString.getBytes(StandardCharsets.ISO_8859_1);
+                index = fileAsString.indexOf(key) +4;
                 break;
             }
             Byte b = new Byte(scanner.next());
             dict.put(key, b);
         }
+        
+        //stripping dictionary off from start of file
+        byte[] fileAsByteArray = new byte[this.byteArray.length-index];
+        for (int i = 0; i < this.byteArray.length-index; i++) {
+            fileAsByteArray[i] = this.byteArray[i+index];
+        }
+        this.byteArray = fileAsByteArray;
         this.dictionary = new HuffmanDictionary(dict, byteArray);
     }
 
@@ -92,17 +103,17 @@ public class HuffmanCompressor {
         byteString = this.bh.getByteString(leftover);
         this.dictionary.extract(byteString);
         
-        int finalSize = this.dictionary.getExtracted().size();
+        int finalSize = this.dictionary.getExtractedByteArray().size();
         System.out.println(finalSize);
         
         byte[] outputArray = new byte[finalSize];
         for (int i = 0; i < finalSize; i++) {
-            outputArray[i] = this.dictionary.getExtracted().get(i);
+            outputArray[i] = this.dictionary.getExtractedByteArray().get(i);
         }
         
         this.bh.setOutputArray(outputArray);
         try {
-            this.bh.writeExtracted();
+            this.bh.writeExtractedFile();
         } catch (IOException ex) {
             System.out.println("Could not write!");
             Logger.getLogger(HuffmanCompressor.class.getName()).log(Level.SEVERE, null, ex);

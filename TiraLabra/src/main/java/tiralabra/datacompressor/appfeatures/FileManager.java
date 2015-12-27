@@ -6,14 +6,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Scanner;
 import tiralabra.datacompressor.appfeatures.huffman.HuffmanCompressor;
 
 /**
  * Class for file capsuling and conversion managing.
  *
- * @author ode
  */
 public class FileManager {
 
@@ -37,41 +35,22 @@ public class FileManager {
 
     }
 
-    /**
-     * Method for setting file variable. fileLabel -variable is set according to
-     * file path or error message.
-     *
-     * @param f File set to curFile -variable
-     */
+    //Setters and getters
     public void setFile(File f) {
         this.curFile = f;
         String filepath = f.getAbsolutePath();
         this.fileLabel = filepath;
         System.out.println("File changed to: " + this.fileLabel);
-        String ext = filepath.substring(filepath.length()-4, filepath.length());
+        String ext = filepath.substring(filepath.length() - 4, filepath.length());
         this.bh.setFileExt(ext);
         readFile();
     }
 
-    /**
-     * Method to get access to file variable.
-     *
-     * @return File object set in curFile or null if none is set.
-     */
     public File getFile() {
         if (curFile != null) {
             return curFile;
         }
         return null;
-    }
-
-    /**
-     * Returns current file as string.
-     *
-     * @return String of current file
-     */
-    public String getFileAsString() {
-        return fileAsString;
     }
 
     /**
@@ -84,6 +63,38 @@ public class FileManager {
             return curFile.getAbsolutePath();
         }
         return this.fileLabel;
+    }
+    
+    /**
+     * Main method for extracting file. First tries to detect coding and if 
+     * recognized calls matching class for decompressing.
+     * 
+     * @return True if coding is detected, false otherwise.
+     */
+    public boolean extract() {
+        //checks if file is set
+        if (this.curFile == null) {
+            this.fileLabel = "No file set!";
+            this.error = true;
+            return false;
+        }
+        
+        //checks coding and calls class according of it for extracting
+        System.out.println("Checking coding for: " + this.fileLabel);
+        String coding = this.fileAsString.substring(0, 4);
+        if (coding.equals("HUFF")) {
+            System.out.println("File " + this.fileLabel + " coded in Huffman...");
+            this.huffmanCompressor.setByteArray(fileAsByteArray);
+            this.huffmanCompressor.readDictionary(this.fileAsString);
+            System.out.println("Extracting file...");
+            this.huffmanCompressor.extractByteArray();
+            System.out.println("Done!");
+            return true;
+        } else {
+            this.fileLabel = "Could not detect coding!";
+            this.error = true;
+            return false;
+        }
     }
 
     /**
@@ -105,8 +116,8 @@ public class FileManager {
     /**
      * Private method for converting file to String object. First converts file
      * to byte array and then makes string object in ISO Latin 1 format out of
-     * it. Stores made string in fileAsString variable. Also prints first 100
-     * characters of string in console.
+     * it (first 20.000 bytes). Stores made string in fileAsString variable.
+     * Also prints first 100 characters of string in console.
      */
     private void readFile() {
         //read file to byte array
@@ -123,7 +134,8 @@ public class FileManager {
         printByteArray(this.fileAsByteArray);
         //convert byte array to string, some characters will be unknown
         //if format is different
-        String s = new String(this.fileAsByteArray, StandardCharsets.ISO_8859_1);
+        String s = new String(this.fileAsByteArray, 0, 20000,
+                StandardCharsets.ISO_8859_1);
 
         if (s.length() > 100) {
             System.out.println("File starting with: \n" + s.substring(0, 100));
@@ -199,25 +211,4 @@ public class FileManager {
             }
         }
     }
-
-    public boolean extract() {
-        if (this.curFile == null) {
-            this.fileLabel = "No file set!";
-            this.error = true;
-            return false;
-        }
-        System.out.println("Checking coding for: " + this.fileLabel);
-        String coding = this.fileAsString.substring(0, 4);
-        if (coding.equals("HUFF")) {
-            System.out.println("File " + this.fileLabel + " coded in Huffman...");
-            this.huffmanCompressor.readDictionary(this.fileAsString);
-            System.out.println("Extracting file...");
-            this.huffmanCompressor.extractByteArray();
-            System.out.println("Done!");
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 }
