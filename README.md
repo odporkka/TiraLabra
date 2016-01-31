@@ -1,3 +1,3 @@
 # TiraLabra
-Tietorakenteiden ja algoritimien harjoitustyö, syksy 2015 (II periodi).
+Tietorakenteiden ja algoritimien harjoitustyö.
 Aiheena tiedostojen pakkaus ja purkamisalgoritmit.
