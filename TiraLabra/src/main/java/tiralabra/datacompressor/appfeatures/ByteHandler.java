@@ -1,5 +1,6 @@
 package tiralabra.datacompressor.appfeatures;
 
+import tiralabra.datacompressor.datastructures.CustomArray;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -7,10 +8,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tiralabra.datacompressor.datastructures.CustomHashMap;
 
 /**
  * Class for custom byte writing and handling. Writes packed and extracted
@@ -23,7 +24,7 @@ public class ByteHandler {
 
     private byte[] inputArray;
     private byte[] outputArray;
-    private HashMap<Byte, String> currentDictionary;
+    private CustomHashMap currentDictionary;
     private File resultFile;
     private File extractFile;
     private String header;
@@ -37,7 +38,7 @@ public class ByteHandler {
         this.inputArray = inputArray;
     }
 
-    public void setCurrentDictionary(HashMap<Byte, String> currentDictionary) {
+    public void setCurrentDictionary(CustomHashMap currentDictionary) {
         this.currentDictionary = currentDictionary;
     }
 
@@ -51,6 +52,10 @@ public class ByteHandler {
 
     public String getFileExt() {
         return fileExt;
+    }
+
+    public void setResultFile(File resultFile) {
+        this.resultFile = resultFile;
     }
 
     /**
@@ -84,7 +89,7 @@ public class ByteHandler {
      */
     public void writePackedFile(String header) {
         //ArrayList containing output bytes in string form
-        ArrayList<String> bytesAsStrings = new ArrayList<>();
+        CustomArray bytesAsStrings = new CustomArray();
 
         //Adding header if needed
         if (header != null) {
@@ -112,8 +117,6 @@ public class ByteHandler {
         }
         addBytesToArray(s, bytesAsStrings);
         System.out.println("Done!");
-        System.out.println(bytesAsStrings.get(0));
-        System.out.println(bytesAsStrings.get(1));
         makeOutputArray(bytesAsStrings);
     }
 
@@ -147,7 +150,7 @@ public class ByteHandler {
      * @param s
      * @param bytesAsStrings
      */
-    private void addBytesToArray(String s, ArrayList<String> bytesAsStrings) {
+    private void addBytesToArray(String s, CustomArray bytesAsStrings) {
         if (s == null) {
             return;
         }
@@ -178,7 +181,7 @@ public class ByteHandler {
      *
      * @param bytesAsStrings
      */
-    private void makeOutputArray(ArrayList<String> bytesAsStrings) {
+    private void makeOutputArray(CustomArray bytesAsStrings) {
         int n = 0;
         Byte b;
         //Calculating output array size.
@@ -189,8 +192,10 @@ public class ByteHandler {
                 + " + header if needed");
         //Making Bytes and addding them into output array.
         System.out.println("Making final file...");
-        for (String s : bytesAsStrings) {
-            b = getByteFromString(s);
+        
+        for (int i = 0; i < bytesAsStrings.size(); i++) {
+            String byteAsString = (String)bytesAsStrings.get(i);
+            b = getByteFromString(byteAsString);
             outputArray[n] = b;
             n++;
         }
@@ -222,7 +227,7 @@ public class ByteHandler {
         fos.write(outputArray);
         fos.close();
         System.out.println("Output stream closed!");
-        System.out.println("File written at /home/packed" + this.fileExt);
+        System.out.println("File written at /home/user/packed" + this.fileExt);
         System.out.println("\n");
         System.out.println("--------");
         System.out.println("\n");

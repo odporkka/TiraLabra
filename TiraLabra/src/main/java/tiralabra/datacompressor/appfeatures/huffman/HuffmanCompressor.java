@@ -6,12 +6,16 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import tiralabra.datacompressor.appfeatures.ByteHandler;
+import tiralabra.datacompressor.datastructures.CustomHashMap;
 
+/**
+ * Class that handles Huffman compressing.
+ */
 public class HuffmanCompressor {
 
     private byte[] byteArray;
     private HuffmanDictionary dictionary;
-    private final ByteHandler bh;
+    private final ByteHandler bh; 
 
     public HuffmanCompressor(ByteHandler bh) {
         this.bh = bh;
@@ -49,7 +53,7 @@ public class HuffmanCompressor {
         String ext = scanner.next();
         System.out.println(ext);
         this.bh.setFileExt(ext);
-        HashMap<String, Byte> dict = new HashMap<>();
+        CustomHashMap dict = new CustomHashMap();
         int index;
         
         //reading dictionary off from start of file
@@ -60,7 +64,7 @@ public class HuffmanCompressor {
                 break;
             }
             Byte b = new Byte(scanner.next());
-            dict.put(key, b);
+            dict.put((String)key, b);
         }
         
         //stripping dictionary off from start of file
@@ -104,11 +108,11 @@ public class HuffmanCompressor {
         this.dictionary.extract(byteString);
         
         int finalSize = this.dictionary.getExtractedByteArray().size();
-        System.out.println(finalSize);
+        System.out.println("Size: "+finalSize);
         
         byte[] outputArray = new byte[finalSize];
         for (int i = 0; i < finalSize; i++) {
-            outputArray[i] = this.dictionary.getExtractedByteArray().get(i);
+            outputArray[i] = (Byte)this.dictionary.getExtractedByteArray().get(i);
         }
         
         this.bh.setOutputArray(outputArray);

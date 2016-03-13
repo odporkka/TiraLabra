@@ -32,7 +32,6 @@ public class FileManager {
         this.error = false;
         this.bh = new ByteHandler();
         this.huffmanCompressor = new HuffmanCompressor(bh);
-
     }
 
     //Setters and getters
@@ -64,11 +63,11 @@ public class FileManager {
         }
         return this.fileLabel;
     }
-    
+
     /**
-     * Main method for extracting file. First tries to detect coding and if 
+     * Main method for extracting file. First tries to detect coding and if
      * recognized calls matching class for decompressing.
-     * 
+     *
      * @return True if coding is detected, false otherwise.
      */
     public boolean extract() {
@@ -78,7 +77,7 @@ public class FileManager {
             this.error = true;
             return false;
         }
-        
+
         //checks coding and calls class according of it for extracting
         System.out.println("Checking coding for: " + this.fileLabel);
         String coding = this.fileAsString.substring(0, 4);
@@ -131,10 +130,14 @@ public class FileManager {
         }
 
         //test print byte[]
-        printByteArray(this.fileAsByteArray);
+        //printByteArray(this.fileAsByteArray);
         //convert byte array to string, some characters will be unknown
         //if format is different
-        String s = new String(this.fileAsByteArray, 0, 20000,
+        int stringLenght = 20000;
+        if (this.fileAsByteArray.length < stringLenght) {
+            stringLenght = this.fileAsByteArray.length;
+        }
+        String s = new String(this.fileAsByteArray, 0, stringLenght,
                 StandardCharsets.ISO_8859_1);
 
         if (s.length() > 100) {

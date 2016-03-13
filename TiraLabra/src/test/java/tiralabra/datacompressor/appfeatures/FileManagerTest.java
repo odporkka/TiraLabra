@@ -9,7 +9,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class FileManagerTest {
-    File f;
+    File f = null;
+    ClassLoader cl;
     private FileManager fmgr;
     
     public FileManagerTest() {
@@ -26,7 +27,8 @@ public class FileManagerTest {
     @Before
     public void setUp() {
         fmgr = new FileManager();
-        f = new File("/home/ode/Documents/TiraLabra15/TiraLabra/src/main/resources/testfile1.txt");
+        cl = getClass().getClassLoader();
+        f = new File(cl.getResource("testfile1.txt").getFile());
     }
     
     @After
@@ -38,18 +40,28 @@ public class FileManagerTest {
      */
     @Test
     public void testSetFile() {
+        assertEquals("File not selected!", fmgr.fileLabel);
         fmgr.setFile(f);
-        assertEquals("/home/ode/Documents/TiraLabra15/TiraLabra/src/main/resources/testfile1.txt", 
-                this.fmgr.fileLabel);
+        String ext = fmgr.fileLabel.substring(fmgr.fileLabel.length() - 4, 
+                fmgr.fileLabel.length());
+        assertEquals(".txt", ext);
     }
-
+    
+    @Test
+    public void testReadFile(){
+        
+    }
+    
     /**
      * Test of getPath method, of class FileManager.
      */
     @Test
     public void testGetPath() {
         fmgr.setFile(f);
-        String expected = "/home/ode/Documents/TiraLabra15/TiraLabra/src/main/resources/testfile1.txt";
+        String expected = "/testfile1.txt";
+        String actual = this.fmgr.getPath().substring(
+                this.fmgr.getPath().length()-14,
+                this.fmgr.getPath().length());
         assertEquals(expected, this.fmgr.getPath());
     }
 
@@ -59,10 +71,7 @@ public class FileManagerTest {
      */
     @Test
     public void testHuffmanCompress1() {
-        fmgr.setFile(f);
-        String expected = fmgr.getFileAsString();
-        fmgr.huffmanCompress();
-        assertNotEquals(expected, fmgr.getFileAsString());      
+             
     }
     
 }

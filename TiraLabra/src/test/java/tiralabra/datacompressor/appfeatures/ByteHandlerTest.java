@@ -5,19 +5,23 @@
  */
 package tiralabra.datacompressor.appfeatures;
 
-import java.util.HashMap;
+import java.io.File;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import tiralabra.datacompressor.appfeatures.huffman.HuffmanDictionary;
 
 /**
  *
  * @author ode
  */
 public class ByteHandlerTest {
+    private ByteHandler bh;
+    byte[] testArray;
+    private HuffmanDictionary hfd;
     
     public ByteHandlerTest() {
     }
@@ -32,64 +36,66 @@ public class ByteHandlerTest {
     
     @Before
     public void setUp() {
+        this.bh = new ByteHandler();
+               
+        this.testArray = new byte[256];
+        byte b;
+        for (int i = 0; i < 256; i++) {
+            b = (byte) i;
+            testArray[i] = b;
+        }
+        
+        this.hfd = new HuffmanDictionary(testArray);
+        this.bh.setCurrentDictionary(this.hfd.getDictionaryByByte());
     }
     
     @After
     public void tearDown() {
-    }
-
-    /**
-     * Test of setInputArray method, of class ByteHandler.
-     */
-    @Test
-    public void testSetInputArray() {
-        System.out.println("setInputArray");
-        byte[] inputArray = null;
-        ByteHandler instance = new ByteHandler();
-        instance.setInputArray(inputArray);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of setCurrentDictionary method, of class ByteHandler.
-     */
-    @Test
-    public void testSetCurrentDictionary() {
-        System.out.println("setCurrentDictionary");
-        HashMap<Byte, String> currentDictionary = null;
-        ByteHandler instance = new ByteHandler();
-        instance.setCurrentDictionary(currentDictionary);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of writePackedFile method, of class ByteHandler.
-     */
-    @Test
-    public void testWriteOutput() {
-        System.out.println("writeOutput");
-        String header = "";
-        ByteHandler instance = new ByteHandler();
-        instance.writePackedFile(header);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
-
-    /**
-     * Test of getByteString method, of class ByteHandler.
-     */
-    @Test
-    public void testGetByteString() {
-        System.out.println("getByteString");
-        byte[] byteArray = null;
-        ByteHandler instance = new ByteHandler();
-        String expResult = "";
-        String result = instance.getByteString(byteArray);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        File f1 = new File(System.getProperty("user.home") + "/packed.test");
+        File f2 = new File(System.getProperty("user.home") + "/extracted.test");
+        if (f1.delete() && f2.delete()){
+            System.out.println("Test files deleted succesfully!");
+        }
     }
     
+    
+    @Test
+    public void getByteStringTest(){
+        String result = this.bh.getByteString(testArray);
+        assertEquals(2048, result.length());
+        result = result.substring(0, 32);
+        assertEquals(
+                "00000000000000010000001000000011", 
+                result);
+    }
+    
+    @Test
+    public void writePackedFileTest(){
+        this.bh.setInputArray(testArray);
+        this.bh.setFileExt(".test");
+        String header = "HUFF: "+this.bh.getFileExt()+"\n";
+        this.bh.writePackedFile(this.hfd.getHeaderString(header));
+        File f = new File(System.getProperty("user.home") + "/packed.test");
+        FileManager fm = new FileManager();
+        fm.setFile(f);
+        String path = System.getProperty("user.home") + "/packed.test";
+        assertEquals(path, fm.fileLabel);
+        assertEquals((long)20068, f.length());
+    }
+    
+    @Test
+    public void writeExtractedFileTest(){
+        this.bh.setInputArray(testArray);
+        this.bh.setFileExt(".test");
+        String header = "HUFF: "+this.bh.getFileExt()+"\n";
+        this.bh.writePackedFile(this.hfd.getHeaderString(header));
+        FileManager fm = new FileManager();
+        File f = new File(System.getProperty("user.home") + "/packed.test");
+        System.out.println(f.getAbsolutePath());
+        fm.setFile(f);
+        boolean success = fm.extract();
+        f = new File(System.getProperty("user.home") + "/extracted.test");
+        assertEquals(257, f.length());
+        
+    }
 }
