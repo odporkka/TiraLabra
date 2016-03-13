@@ -47,11 +47,6 @@ public class FileManagerTest {
         assertEquals(".txt", ext);
     }
     
-    @Test
-    public void testReadFile(){
-        
-    }
-    
     /**
      * Test of getPath method, of class FileManager.
      */
@@ -64,14 +59,4 @@ public class FileManagerTest {
                 this.fmgr.getPath().length());
         assertEquals(expected, this.fmgr.getPath());
     }
-
-    /**
-     * Test1 of huffmanCompress method, of class FileManager.
-     * Tests if file has changed at all.
-     */
-    @Test
-    public void testHuffmanCompress1() {
-             
-    }
-    
 }

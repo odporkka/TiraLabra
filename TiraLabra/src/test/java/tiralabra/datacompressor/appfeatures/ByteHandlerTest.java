@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package tiralabra.datacompressor.appfeatures;
 
 import java.io.File;
@@ -15,7 +10,9 @@ import static org.junit.Assert.*;
 import tiralabra.datacompressor.appfeatures.huffman.HuffmanDictionary;
 
 /**
- *
+ * Tests of the ByteHandler class. Also kind of tests whole program since 
+ * you cannot test ByteHandler unless you have working packing/extracting
+ * algorithm with dictionary.
  * @author ode
  */
 public class ByteHandlerTest {

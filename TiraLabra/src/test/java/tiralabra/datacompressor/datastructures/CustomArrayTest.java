@@ -8,7 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- *
+ * Tests of custom "ArrayList" class.
  * @author ode
  */
 public class CustomArrayTest {
