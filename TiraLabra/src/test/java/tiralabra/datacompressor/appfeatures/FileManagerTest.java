@@ -46,17 +46,4 @@ public class FileManagerTest {
                 fmgr.fileLabel.length());
         assertEquals(".txt", ext);
     }
-    
-    /**
-     * Test of getPath method, of class FileManager.
-     */
-    @Test
-    public void testGetPath() {
-        fmgr.setFile(f);
-        String expected = "/testfile1.txt";
-        String actual = this.fmgr.getPath().substring(
-                this.fmgr.getPath().length()-14,
-                this.fmgr.getPath().length());
-        assertEquals(expected, this.fmgr.getPath());
-    }
 }
